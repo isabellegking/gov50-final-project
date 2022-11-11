@@ -115,7 +115,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["index_files/anchor-4.2.2/anchor.min.js","index_files/bowser-1.9.3/bowser.min.js","index_files/distill-2.2.21/template.v2.js","index_files/header-attrs-2.16/header-attrs.js","index_files/header-attrs-2.17/header-attrs.js","index_files/jquery-3.6.0/jquery-3.6.0.js","index_files/jquery-3.6.0/jquery-3.6.0.min.js","index_files/jquery-3.6.0/jquery-3.6.0.min.map","index_files/popper-2.6.0/popper.min.js","index_files/tippy-6.2.7/tippy-bundle.umd.min.js","index_files/tippy-6.2.7/tippy-light-border.css","index_files/tippy-6.2.7/tippy.css","index_files/tippy-6.2.7/tippy.umd.min.js","index_files/webcomponents-2.0.0/webcomponents.js"]}
+  {"type":"character","attributes":{},"value":["index_files/anchor-4.2.2/anchor.min.js","index_files/bowser-1.9.3/bowser.min.js","index_files/distill-2.2.21/template.v2.js","index_files/figure-html5/unnamed-chunk-7-1.png","index_files/header-attrs-2.16/header-attrs.js","index_files/header-attrs-2.17/header-attrs.js","index_files/jquery-3.6.0/jquery-3.6.0.js","index_files/jquery-3.6.0/jquery-3.6.0.min.js","index_files/jquery-3.6.0/jquery-3.6.0.min.map","index_files/popper-2.6.0/popper.min.js","index_files/tippy-6.2.7/tippy-bundle.umd.min.js","index_files/tippy-6.2.7/tippy-light-border.css","index_files/tippy-6.2.7/tippy.css","index_files/tippy-6.2.7/tippy.umd.min.js","index_files/webcomponents-2.0.0/webcomponents.js"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
   <!--/radix_placeholder_navigation_in_header-->
@@ -1521,6 +1521,68 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <p>I am interested in exploring data related to political instability in West Africa. I wrote an article last month for HIR on Operation Barkhane, which is a French anti-terrorism force in the region. As of August this year, the military force has evacuated Mali. I am interested in how these changes have impacted the Sahel.</p>
 <h2 id="proposal">Proposal</h2>
 <p>What is the relationship between corruption and political violence? Over the past five years, the political situation in West Africa has grown increasingly unstable, with many experts calling the region a “coup contagion.” I am suspicious of this theory though. I want to know about the relationship between corruption and the past/current political violence. I hypothesize that when there is a high level of perceived corruption in the government, there will be an increase in political violence. I will be using the Political Violence dataset to answer my research question. The explanatory variables corrupti and corruptm provide two measures of corruption by Knack &amp; Keefer and Mauro, respectively. It will be useful to have two separate measures in order to corroborate my findings since corruption is notoriously difficult to measure in the region. My outcome variables will be coups60, coups70, and coups80, which measure the number of extraconstitutional or forced changes in the top government. Later in the project, I may choose a different outcome variable or add more in, but, at this moment, I am particularly interested in the prevalence of coups in the region. A positive correlation would support my hypothesis, while a negative correlation would disprove it. I suspect that the explanatory variables and outcome variables will move together in the positive direction.</p>
+<h2 id="set-up">Set-up</h2>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://tidyverse.tidyverse.org'>tidyverse</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/tidymodels/infer'>infer</a></span><span class='op'>)</span></span>
+<span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://ggplot2.tidyverse.org'>ggplot2</a></span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://walker-data.com/tidycensus/'>tidycensus</a></span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<h2 id="data-wrangling">Data Wrangling</h2>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>all_vars_acs5</span> <span class='op'>&lt;-</span> </span>
+<span>  <span class='fu'><a href='https://walker-data.com/tidycensus/reference/load_variables.html'>load_variables</a></span><span class='op'>(</span>year <span class='op'>=</span> <span class='fl'>2020</span>, dataset <span class='op'>=</span> <span class='st'>"acs5"</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>vars_acs5</span> <span class='op'>&lt;-</span></span>
+<span>  <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span></span>
+<span>    median_income <span class='op'>=</span> <span class='st'>"B06011_001"</span>,</span>
+<span>    median_rent <span class='op'>=</span> <span class='st'>"B25064_001"</span>, </span>
+<span>    white <span class='op'>=</span> <span class='st'>"B02001_002"</span>, </span>
+<span>    black <span class='op'>=</span> <span class='st'>"B02001_003"</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>rva_tracts</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://walker-data.com/tidycensus/reference/get_acs.html'>get_acs</a></span><span class='op'>(</span></span>
+<span>  geography <span class='op'>=</span> <span class='st'>"tract"</span>, </span>
+<span>  variable <span class='op'>=</span> <span class='va'>vars_acs5</span>, </span>
+<span>  state <span class='op'>=</span> <span class='st'>"VA"</span>, </span>
+<span>  county <span class='op'>=</span> <span class='st'>"Richmond City"</span>, </span>
+<span>  year <span class='op'>=</span> <span class='fl'>2020</span></span>
+<span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>wider_rva_tracts</span> <span class='op'>&lt;-</span> <span class='va'>rva_tracts</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://tidyr.tidyverse.org/reference/pivot_wider.html'>pivot_wider</a></span><span class='op'>(</span>names_from <span class='op'>=</span> <span class='va'>variable</span>, </span>
+<span>              values_from <span class='op'>=</span> <span class='va'>estimate</span><span class='op'>)</span></span></code></pre>
+</div>
+</div>
+<div class="layout-chunk" data-layout="l-body">
+<div class="sourceCode">
+<pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>plot_income_density</span> <span class='op'>&lt;-</span> <span class='va'>wider_rva_tracts</span> <span class='op'>|&gt;</span></span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggplot.html'>ggplot</a></span><span class='op'>(</span>mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='va'>median_income</span><span class='op'>)</span><span class='op'>)</span> <span class='op'>+</span> </span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/geom_histogram.html'>geom_histogram</a></span><span class='op'>(</span>mapping <span class='op'>=</span> <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/aes.html'>aes</a></span><span class='op'>(</span>y <span class='op'>=</span> <span class='va'>..density..</span><span class='op'>)</span>, </span>
+<span>                 color <span class='op'>=</span> <span class='st'>"steelblue1"</span>, </span>
+<span>                 fill <span class='op'>=</span> <span class='st'>"steelblue1"</span><span class='op'>)</span> <span class='op'>+</span> </span>
+<span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>"Median Annual Income in USD"</span>, </span>
+<span>       y <span class='op'>=</span> <span class='st'>"Density"</span>, </span>
+<span>       title <span class='op'>=</span> <span class='st'>"Distribution of Income in Richmond City (2020)"</span><span class='op'>)</span></span>
+<span><span class='va'>plot_income_density</span></span></code></pre>
+</div>
+<p><img src="index_files/figure-html5/unnamed-chunk-7-1.png" width="624" /></p>
+</div>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->

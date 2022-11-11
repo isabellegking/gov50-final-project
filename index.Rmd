@@ -16,3 +16,64 @@ I am interested in exploring data related to political instability in West Afric
 ## Proposal
 
 What is the relationship between corruption and political violence? Over the past five years, the political situation in West Africa has grown increasingly unstable, with many experts calling the region a "coup contagion." I am suspicious of this theory though. I want to know about the relationship between corruption and the past/current political violence. I hypothesize that when there is a high level of perceived corruption in the government, there will be an increase in political violence. I will be using the Political Violence dataset to answer my research question. The explanatory variables corrupti and corruptm provide two measures of corruption by Knack & Keefer and Mauro, respectively. It will be useful to have two separate measures in order to corroborate my findings since corruption is notoriously difficult to measure in the region. My outcome variables will be coups60, coups70, and coups80, which measure the number of extraconstitutional or forced changes in the top government. Later in the project, I may choose a different outcome variable or add more in, but, at this moment, I am particularly interested in the prevalence of coups in the region. A positive correlation would support my hypothesis, while a negative correlation would disprove it. I suspect that the explanatory variables and outcome variables will move together in the positive direction. 
+
+## Set-up 
+
+```{r}
+library(tidyverse)
+library(infer)
+library(ggplot2)
+```
+
+```{r}
+library(tidycensus)
+```
+
+
+## Data Wrangling
+
+```{r}
+all_vars_acs5 <- 
+  load_variables(year = 2020, dataset = "acs5")
+```
+
+
+```{r}
+vars_acs5 <-
+  c(
+    median_income = "B06011_001",
+    median_rent = "B25064_001", 
+    white = "B02001_002", 
+    black = "B02001_003")
+```
+
+
+```{r}
+rva_tracts <- get_acs(
+  geography = "tract", 
+  variable = vars_acs5, 
+  state = "VA", 
+  county = "Richmond City", 
+  year = 2020
+)
+```
+
+```{r}
+wider_rva_tracts <- rva_tracts |>
+  pivot_wider(names_from = variable, 
+              values_from = estimate)
+```
+
+
+```{r}
+plot_income_density <- wider_rva_tracts |>
+  ggplot(mapping = aes(x = median_income)) + 
+  geom_histogram(mapping = aes(y = ..density..), 
+                 color = "steelblue1", 
+                 fill = "steelblue1") + 
+  labs(x = "Median Annual Income in USD", 
+       y = "Density", 
+       title = "Distribution of Income in Richmond City (2020)")
+plot_income_density
+```
+
