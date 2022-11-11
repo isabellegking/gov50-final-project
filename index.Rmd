@@ -64,6 +64,7 @@ wider_rva_tracts <- rva_tracts |>
               values_from = estimate)
 ```
 
+## Density Histogram 
 
 ```{r}
 plot_income_density <- wider_rva_tracts |>
@@ -73,7 +74,8 @@ plot_income_density <- wider_rva_tracts |>
                  fill = "steelblue1") + 
   labs(x = "Median Annual Income in USD", 
        y = "Density", 
-       title = "Distribution of Income in Richmond City (2020)")
+       title = "Distribution of Income in Richmond City (2020)", 
+       source = "Median")
 plot_income_density
 ```
 

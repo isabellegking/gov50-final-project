@@ -1569,6 +1569,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <span>              values_from <span class='op'>=</span> <span class='va'>estimate</span><span class='op'>)</span></span></code></pre>
 </div>
 </div>
+<h2 id="density-histogram">Density Histogram</h2>
 <div class="layout-chunk" data-layout="l-body">
 <div class="sourceCode">
 <pre class="sourceCode r"><code class="sourceCode r"><span><span class='va'>plot_income_density</span> <span class='op'>&lt;-</span> <span class='va'>wider_rva_tracts</span> <span class='op'>|&gt;</span></span>
@@ -1578,7 +1579,8 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <span>                 fill <span class='op'>=</span> <span class='st'>"steelblue1"</span><span class='op'>)</span> <span class='op'>+</span> </span>
 <span>  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/labs.html'>labs</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='st'>"Median Annual Income in USD"</span>, </span>
 <span>       y <span class='op'>=</span> <span class='st'>"Density"</span>, </span>
-<span>       title <span class='op'>=</span> <span class='st'>"Distribution of Income in Richmond City (2020)"</span><span class='op'>)</span></span>
+<span>       title <span class='op'>=</span> <span class='st'>"Distribution of Income in Richmond City (2020)"</span>, </span>
+<span>       source <span class='op'>=</span> <span class='st'>"Median"</span><span class='op'>)</span></span>
 <span><span class='va'>plot_income_density</span></span></code></pre>
 </div>
 <p><img src="index_files/figure-html5/unnamed-chunk-7-1.png" width="624" /></p>
