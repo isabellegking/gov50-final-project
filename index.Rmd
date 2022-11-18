@@ -17,6 +17,14 @@ I am interested in exploring data related to political instability in West Afric
 
 What is the relationship between corruption and political violence? Over the past five years, the political situation in West Africa has grown increasingly unstable, with many experts calling the region a "coup contagion." I am suspicious of this theory though. I want to know about the relationship between corruption and the past/current political violence. I hypothesize that when there is a high level of perceived corruption in the government, there will be an increase in political violence. I will be using the Political Violence dataset to answer my research question. The explanatory variables corrupti and corruptm provide two measures of corruption by Knack & Keefer and Mauro, respectively. It will be useful to have two separate measures in order to corroborate my findings since corruption is notoriously difficult to measure in the region. My outcome variables will be coups60, coups70, and coups80, which measure the number of extraconstitutional or forced changes in the top government. Later in the project, I may choose a different outcome variable or add more in, but, at this moment, I am particularly interested in the prevalence of coups in the region. A positive correlation would support my hypothesis, while a negative correlation would disprove it. I suspect that the explanatory variables and outcome variables will move together in the positive direction. 
 
+## New research question 
+
+What is the relationship between race and income in Richmond, VA? 
+
+Data: from the American Community Survey, the top source for demographic information on the US population, in the tidycensus package. ACS is mailed to around 3.5 million households per year (approximately 3 percent of the US population). Using data from acs5 for 2020. 
+
+Why: grew up in Richmond; construction of I-95 through the city in the 1950s and red lining have deeply impacted the city; I suspect that these effects have some correlation with race 
+
 ## Set-up 
 
 ```{r}
@@ -37,6 +45,59 @@ all_vars_acs5 <-
   load_variables(year = 2020, dataset = "acs5")
 ```
 
+```{r}
+### unique(all_vars_acs5$concept)
+```
+
+## Key 
+   ### pov_by_age = "POVERTY STATUS IN THE PAST 12 MONTHS BY AGE"
+   ### house_income = "HOUSEHOLD INCOME IN THE PAST 12 MONTHS (IN 2020 INFLATION-ADJUSTED DOLLARS)" 
+   ### house_earnings = "EARNINGS IN THE PAST 12 MONTHS FOR HOUSEHOLDS" 
+   ### house_wage = "WAGE OR SALARY INCOME IN THE PAST 12 MONTHS FOR HOUSEHOLDS" 
+   ### per_income = "PER CAPITA INCOME IN THE PAST 12 MONTHS (IN 2020 INFLATION-ADJUSTED DOLLARS)" 
+   ### rent = AGGREGATE RENT ASKED (DOLLARS)
+   ### rent_income = HOUSEHOLD INCOME IN THE PAST 12 MONTHS (IN 2020 INFLATION-ADJUSTED DOLLARS) BY GROSS RENT
+   
+  
+```{r}
+## vars1 <- c(
+  ## white = "B02001_002", 
+  ## black = "B02001_003", 
+  ## asian = "B02001_005", 
+  ## pacific = "B02001_006", 
+ ##  american_indian = "B02001_004", 
+ ##  total_pop = "B01003_001", 
+ ##  house_type = "B11001_001", 
+ ##  pov_by_age = "B17020_001", 
+  ## house_income = "B19001_001", 
+  ## house_earnings = "B19051_001", 
+  ## house_wage = "B19052_001", 
+ ##  gini = "B19083_001", 
+  ## per_income = "B19301_001", 
+ ##  rent = "B25062_001", 
+ ##  rent_income = "B25122_001"
+## )
+```
+
+
+```{r}
+## rva_vars <- get_acs(
+  ## geography = "tract", 
+  ## variable = vars1, 
+  ## state = "VA", 
+  ## county = "Richmond City", 
+  ## year = 2020
+## )
+## rva_vars
+```
+
+```{r}
+## pivot_rva_vars <- rva_vars |>
+  ## pivot_wider(names_from = variable, 
+    ##           values_from = estimate)
+## pivot_rva_vars
+```
+
 
 ```{r}
 vars_acs5 <-
@@ -44,7 +105,8 @@ vars_acs5 <-
     median_income = "B06011_001",
     median_rent = "B25064_001", 
     white = "B02001_002", 
-    black = "B02001_003")
+    black = "B02001_003", 
+    total_pop = "B01003_001")
 ```
 
 
@@ -64,18 +126,38 @@ wider_rva_tracts <- rva_tracts |>
               values_from = estimate)
 ```
 
-## Density Histogram 
 
 ```{r}
-plot_income_density <- wider_rva_tracts |>
+plot_income <- wider_rva_tracts |>
   ggplot(mapping = aes(x = median_income)) + 
-  geom_histogram(mapping = aes(y = ..density..), 
-                 color = "steelblue1", 
+  geom_histogram(color = "steelblue1", 
                  fill = "steelblue1") + 
   labs(x = "Median Annual Income in USD", 
-       y = "Density", 
+       y = "Count", 
        title = "Distribution of Income in Richmond City (2020)", 
        source = "Median")
-plot_income_density
+plot_income
 ```
+
+
+```{r}
+max_table <- wider_rva_tracts |>
+  group_by(NAME) |>
+  summarize(mean_income = mean(median_income, 
+                        na.rm = TRUE)) |>
+  slice_max(mean_income, n = 10) |>
+  knitr::kable(col.names = c("Tract", "Average Median Income"))
+max_table
+```
+```{r}
+min_table <- wider_rva_tracts |>
+  group_by(NAME) |>
+  summarize(mean_income = mean(median_income, 
+                        na.rm = TRUE)) |>
+  slice_min(mean_income, n = 10) |>
+  knitr::kable(col.names = c("Tract", "Average Median Income"))
+min_table
+```
+
+This section of my project looks at the distribution of income among census tracts in Richmond City County. The first visualization demonstrates the distribution of median annual income in USD. The next two charts show the highest and lowest tracts according to annual income. My next step is to look at the factors that might explain the differences between tract income. 
 
