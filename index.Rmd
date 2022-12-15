@@ -9,19 +9,17 @@ output:
 
 ## Introduction
 
-Does being white lead to an increase in income? In this study, I plan to evaluate the extent to which whiteness leads to higher income. I hypothesize that in Richmond, VA, being white positively impacts income.
+Does being white lead to an increase in income? In this study, I plan to evaluate the extent to which whiteness is associated with higher income. I hypothesize that in Richmond, VA, being white positively impacts income.
 
-Richmond, VA is my hometown. I grew up there and did not live anywhere else until coming to Harvard for college. Richmond was the capital of the Confederacy during the Civil War and since has had a dark history of racial discrimination and segregation; the last confederate monument in the city was only removed December of 2022. Furthermore, the construction of I-95 in the 1950s and the prolonged use of redlining have deeply impacted the city. In the summer of 2020, the New York Times profiled old redlining maps of Richmond, which first piqued my interest in the legacy of this practice (Plumer and Popovich 2020 "How Decades of Racist Housing Policy Left Neighborhoods Sweltering"). My impression is that Richmond remains deeply racially and socio-economically segregated today. I hope that this study will provide some evidence on this topic.   
+Richmond, VA is my hometown. I grew up there and did not live anywhere else until coming to Harvard for college. During the Civil War, Richmond was the capital of the Confederacy. Since then, the city has had a dark history of racial discrimination and segregation; the last confederate monument in the city was only removed in December of 2022. Furthermore, the construction of highway I-95 through the city in the 1950s and the prolonged use of redlining have deeply impacted my hometown. In the summer of 2020, the New York Times ran a profile on Richmond's old redlining maps. This story first piqued my interest in the unfortunate legacy of this practice (Plumer and Popovich 2020). My impression is that Richmond remains deeply racially and socio-economically segregated. I hope that this study will provide some more evidence on this topic.   
 
 ## Data
 
-The data used in this project is from the American Community Survey (ACS), which is the top source for demographic information on the US population, in the tidycensus package. The ACS is mailed to around 3.5 million households per year (approximately 3 percent of the US population). 
+The data used in this project is from the American Community Survey (ACS), which is the top source for demographic information on the US population, and found in the tidycensus package. The ACS is mailed to around 3.5 million households per year (approximately 3 percent of the US population). I will be using data from acs5 for the year 2020. The main independent variable is the proportion of the census tract that is white (prop_white) and the dependent variable is income (median_income). All variables are measured through the ACS survey. 
 
-In this project, I will be using data from acs5 for the year 2020. The main independent variable is the proportion of the census tract that is white (prop_white) and the dependent variable is income (median_income). All variables are measured through the ACS survey. 
+My research design is cross-sectional, meaning that I will compare the outcomes of the treated and control groups at one point in time. In order to do this, I have that these two groups are identical on average, like in a randomized control trial (as-if randomized). My statistical control, the proportion of the tract population that has a college degree (prop_college), will help adjust for confounders. 
 
-My research design is cross-sectional, meaning that I will compare the outcomes of the treated and control groups at one point in time. In order to do this, I have that these two groups are identical on average, like in an RCT (as-if randomized). My statistical controls, the proportion of the tract population that has a college or higher degree (prop_edu) and the proportion of the tract population that has private insurance (prop_private), will help adjust for confounders. 
-
-Below is my code for tidying the data and plot of the dependent variable:
+Below is my code for tidying the data, a plot of the dependent variable, and two charts summarizing the top ten most wealthy and least wealthy census tracts according to income:
 
 ```{r}
 library(tidyverse)
@@ -96,28 +94,54 @@ plot_income <- wider_rva_tracts |>
 plot_income
 ```
 
-## Results
-
-I ran two regressions: a simple one with only the main independent variable and one multiple regression with the independent variables proportion of the census tract that is white (prop_white) and proportion of the census tract with a college degree (prop_college). Finally, I graphed a scatterplot of the proportion of white people and median income. 
-
-In the simple regression, the estimated coefficient on prop_white is 39187. This means that for a one unit increase the proportion of white people in the tract (prop_white), income (median_income) is 391.87 percentage points higher. 
-
-In the multiple regression, the estimated coefficient on prop_white is 8460. This means that for a one unit increase in the proportion of white people in the tract (prop_white), income (median_income) is 84.60 percentage points higher, after controlling for the possible confounder of the proportion of the population having a college degree (prop_college). The estimated coefficient on prop_college is 82343. This means that for a one unit increase in the proportion of having a college degree in the tract (prop_college), income (median_income) is 823.43 percentage points higher, after controlling for the possible confounder of the proportion of the population that is white (prop_white).  
-
-In both regressions, increases in the proportion of white people in the tract means increases in the percentage points of income. Adding in the proportion of people in the tract with a college degree, however, severely decreases the associated percentage point increase. For example, in the simple regression, the percentage point increase in median_income is 391.87, while, in the multiple regression, the percentage point increase in median_income is 84.60. This difference implies that the proportion of white people in the tract is a crucial factor in median_income but the extent to which it is the most defining factor is unclear. As shown in the marked percentage point increase in multiple regression associated with the percentage of the census tract with a college degree (823.43), educational level could be more important. 
-
-Statistically significant: we can reject the null of no effect 
-
 ```{r}
 wider_rva_tracts <- wider_rva_tracts |>
   mutate(prop_white = white / total_pop, 
          prop_black = black / total_pop, 
-         prop_private = private_insur / total_pop, 
-         prop_college = college_edu / total_pop, 
-         prop_grad = grad_edu / total_pop)
-wider_rva_tracts <- wider_rva_tracts |>
-  mutate(prop_edu = prop_college + prop_grad)
+         prop_college = college_edu / total_pop)
 ```
+
+
+```{r}
+max_table <- wider_rva_tracts |>
+  group_by(NAME) |>
+  summarize(mean_income = mean(median_income, 
+                        na.rm = TRUE), 
+            prop_white * 100, 
+            prop_black * 100, 
+            prop_college * 100) |>
+  slice_max(mean_income, n = 10) |>
+  knitr::kable(digits = 2, 
+               col.names = c("Tract", "Average Income", 
+                             "Percentage White", "Percentage Black", 
+                             "Percentage with College Degree"))
+max_table
+```
+
+```{r}
+min_table <- wider_rva_tracts |>
+  group_by(NAME) |>
+  summarize(mean_income = mean(median_income, 
+                        na.rm = TRUE), 
+            prop_white * 100, 
+            prop_black *100, 
+            prop_college * 100) |>
+  slice_min(mean_income, n = 10) |>
+  knitr::kable(digits = 2, 
+               col.names = c("Tract", "Average Income", 
+                             "Percentage White", "Percentage Black", 
+                             "Percentage with College Degree"))
+min_table
+```
+
+
+## Results
+
+In this study, I ran two regressions: a simple one with the main independent variable and a multiple regression with the independent variables the proportion of the census tract that is white (prop_white) and the proportion of the census tract with a college degree (prop_college). Finally, I graphed a scatter plot of the proportion white people and median income in a census tract. 
+
+In the simple regression, the estimated coefficient on prop_white is 39187. This means that for a one unit increase the proportion of white people in the tract (prop_white), income (median_income) ioncreases by 391.87 percentage points. 
+
+
 
 ```{r}
 reg <- lm(median_income ~ prop_white, 
@@ -131,6 +155,12 @@ modelsummary::modelsummary(reg,
                                          "p = {p.value}"),
                            gof_map = c("nobs", "r.squared", "adj.r.squared"))
 ```
+
+
+
+In the multiple regression, the estimated coefficient on prop_white is 8460. This means that for a one unit increase in the proportion of white people in the tract (prop_white), income (median_income) increases by 84.60 percentage points, after controlling for the possible confounder of the proportion of the population having a college degree (prop_college). The estimated coefficient on prop_college is 82343. This means that for a one unit increase in the proportion of having a college degree in the tract (prop_college), income (median_income) increases by 823.43 percentage points, after controlling for the possible confounder of the proportion of the population that is white (prop_white). 
+
+
 
 
 ```{r}
@@ -147,6 +177,16 @@ modelsummary::modelsummary(mult.reg,
 ```
 
 
+
+In both regressions, increases in the proportion of white people in the tract leads to increases in the percentage points of income. Controlling for the proportion of people in the tract with a college degree, however, severely decreases the associated percentage point increase. For example, in the simple regression, the percentage point increase in median_income is 391.87, while, in the multiple regression, the percentage point increase in median_income is 84.60. This difference implies that the proportion of white people in the tract is a crucial factor in median_income, but the extent to which it is the most defining factor is unclear. As shown in the marked percentage point increase in multiple regression associated with the percentage of the census tract with a college degree (823.43), educational level could be more important in determining income. 
+
+Statistical significance refers to the ability to reject the null hypothesis of no effect. In this study, the null hypothesis would mean that any change in the proportion of white people in the tract (prop_white) would have no effect on income (median_income).  A p-value is the probability of observing data getting as or more extreme as our data under the null. Smaller p-values indicate stronger evidence against the null, and p-values less than or equal to 0.05 are generally seen as "statistically significant". In  the multiple regression, prop_white's p-value is 0.378 and thus not below the alpha (0.05) needed to reject the null. Therefore, the estimated coefficient of prop_white is not statistically significant.   
+
+For the estimated coefficient of prop_white to represent a causal effect, changes in the proportion of white people in the tract (prop_white) would be directly responsible for changes in income (median_income). I do not believe that prop_white represents a causal effect because of the possibility of confoundedness. Although there is a positive correlation between prop_white and median_income, there are many other immeasurable factors at play, such as education level, to confidently claim causality. 
+
+
+
+
 ```{r}
 wider_rva_tracts |>
   ggplot(mapping = aes(x = prop_white, 
@@ -160,35 +200,4 @@ wider_rva_tracts |>
 
 ## Conclusion
 
-```{r}
-max_table <- wider_rva_tracts |>
-  group_by(NAME) |>
-  summarize(mean_income = mean(median_income, 
-                        na.rm = TRUE), 
-            prop_white * 100, 
-            prop_black *100, 
-            prop_edu * 100) |>
-  slice_max(mean_income, n = 10) |>
-  knitr::kable(digits = 2, 
-               col.names = c("Tract", "Average Income", 
-                             "Percentage White", "Percentage Black", 
-                             "Percentage Educated"))
-max_table
-```
-
-```{r}
-min_table <- wider_rva_tracts |>
-  group_by(NAME) |>
-  summarize(mean_income = mean(median_income, 
-                        na.rm = TRUE), 
-            prop_white * 100, 
-            prop_black *100, 
-            prop_edu * 100) |>
-  slice_min(mean_income, n = 10) |>
-  knitr::kable(digits = 2, 
-               col.names = c("Tract", "Average Income", 
-                             "Percentage White", "Percentage Black", 
-                             "Percentage Educated"))
-min_table
-```
-
+In this study, I found that increases in the proportion of white people in a census tract in Richmond is associated with increases in income. This general conclusion supports my hypothesize that in Richmond, VA, being white positively impacts income. One drawback to this project are the inherent limitations present in using a cross-sectional study design. This method requires the assumption that the treatment and control groups are identical on average, but, like any assumption, this could potentially not be true for my data set. Additionally, it is only possible to control for observed variables, like prop_college. There are many other variables involved in determining differences in income, however, that are not observed in this study and that are difficult to measure. This fact poses a major threat to inference, the threat of unmeasured confounding. In the future, this study could be improved by measuring and then incorporating more confounding variables, such as measures of generational wealth. This will only be useful to a certain extent, however, as some variables are incredibly challenging to measure. It is much more difficult to collect data on low-income citizens than high-income citizens because rich people generally have more time and are easier to reach. This phenomenon poses a substantial threat to this study, since there is fundamentally much more data on rich people than poor people. 
