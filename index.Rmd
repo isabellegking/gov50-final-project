@@ -1,7 +1,7 @@
 ---
-title: "Gov 50 Final Project"
+title: "Earning More in the South"
 author: "Isabelle King"
-description: "Final project"
+description: "The Extent to Which Whiteness is Associated with Higher Income in Richmond, Virginia"
 output:
   distill::distill_article:
     self_contained: true
